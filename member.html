@@ -192,16 +192,14 @@
 
 <div class="member-list">
 
-<div class="member-item" data-member-id="member_10">
+<div class="member-item cancelled" data-member-id="member_10">
 <div class="member-photo">
 <img src="images/members/member_10.jpg" alt="うぐゐmark">
 </div>
 <div class="member-info">
 <p class="member-name">うぐゐmark</p>
 <div class="member-icons">
-<span class="icon-badge license-badge status-aru" data-status="aru"><span class="emoji">🪪</span><span class="license-text">免許あり</span></span>
-<span class="icon-badge going-badge status-yakoubus"><span class="emoji">🚍</span>行き：夜行バス</span>
-<span class="icon-badge return-badge status-shinkansen" data-status="shinkansen"><span class="emoji">🚄</span>帰り：<span class="return-text">新幹線</span></span>
+<span class="icon-badge cancelled-badge"><span class="emoji">✕</span>不参加</span>
 </div>
 </div>
 </div>
@@ -263,6 +261,7 @@
 <option value="">自分の名前を選択...</option>
 </select>
 <button type="button" id="share-location-btn" class="edit-mode-btn">📍 現在地を共有する</button>
+<button type="button" id="clear-location-btn" class="edit-mode-btn">✕ 自分のピンを消す</button>
 <button type="button" id="refresh-location-btn" class="edit-mode-btn">🔄 最新の状況を更新</button>
 </div>
 
@@ -418,6 +417,7 @@
 
     var memberSelect = document.getElementById("my-member-select");
     var shareBtn = document.getElementById("share-location-btn");
+    var clearBtn = document.getElementById("clear-location-btn");
     var refreshBtn = document.getElementById("refresh-location-btn");
     var statusMsg = document.getElementById("location-status-msg");
     var legendEl = document.getElementById("location-legend");
@@ -557,6 +557,25 @@
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
+    });
+
+    clearBtn.addEventListener("click", function () {
+        var myId = memberSelect.value;
+        if (!myId) {
+            statusMsg.textContent = "先に自分の名前を選択してください。";
+            return;
+        }
+        if (!window.confirm("地図上の自分のピンを消しますか？")) return;
+        statusMsg.textContent = "ピンを削除中...";
+        fetch(DB_URL + "/location/" + encodeURIComponent(myId) + ".json", {
+            method: "DELETE"
+        }).then(function () {
+            statusMsg.textContent = "ピンを削除しました。";
+            fetchLocations();
+        }).catch(function (err) {
+            console.error("現在地データの削除に失敗:", err);
+            statusMsg.textContent = "削除に失敗しました。通信環境を確認してください。";
+        });
     });
 
     refreshBtn.addEventListener("click", fetchLocations);
